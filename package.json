@@ -1,0 +1,15 @@
+{
+  "name": "snap-carousel-debug",
+  "version": "0.0.0",
+  "description": "attempt to reproduce a bug in which not all of the items in the data array are rendered",
+  "author": null,
+  "private": true,
+  "main": "node_modules/expo/AppEntry.js",
+  "dependencies": {
+    "expo": "^29.0.0",
+    "react": "16.3.1",
+    "react-native": "https://github.com/expo/react-native/archive/sdk-29.0.0.tar.gz",
+    "react-native-elements": "0.19.1",
+    "react-native-snap-carousel": "3.7.3"
+  }
+}
