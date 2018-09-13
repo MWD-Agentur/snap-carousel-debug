@@ -13,21 +13,28 @@ const data = [
   31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
 ].map(val => val - 1);
 
-const ItemCard = ({ wanted, num, index }) => (
-  <Card style={styles.card}>
-    <Text style={[styles.cardText, { color: wanted === num ? 'lime' : 'red' }]}>
-      {num}
-    </Text>
-  </Card>
-);
+const ItemCard = ({ wanted, num, index, check }) => {
+  if (wanted === num) check();
+  return (
+    <Card style={styles.card}>
+      <Text style={[styles.cardText, { color: wanted === num ? 'lime' : 'red' }]}>
+        {num}
+      </Text>
+    </Card>
+  );
+}
 
 export default class App extends React.Component {
   state = {
     index: 20,
+    attempts: 0,
+    fixed: false,
   };
 
   goPrev = () => {
+    if (this.carousel) this.carousel.snapToPrev();
     const { index } = this.state;
+
     if (index === 0) {
       this.setState({ index: data.length - 1 });
       return;
@@ -36,7 +43,9 @@ export default class App extends React.Component {
   };
 
   goNext = () => {
+    if (this.carousel) this.carousel.snapToNext();
     const { index } = this.state;
+
     if (index === data.length - 1) {
       this.setState({ index: 0 });
       return;
@@ -45,9 +54,31 @@ export default class App extends React.Component {
   };
 
   onSnapToItem = (newDataIndex) => {
-    console.info('onSnapToItem', newDataIndex);
     this.setState({ index: newDataIndex });
   };
+
+  check = (wanted, num, index) => {
+    if (this.state.fixed) return;
+    this.setState({ fixed: true });
+  };
+
+  fixPosition = () => {
+    const { index, fixed } = this.state;
+    if (fixed) return;
+
+    requestAnimationFrame(() => {
+      if (!this.carousel) return;
+
+      this.carousel.snapToItem(index, false, true);
+      this.fixPosition();
+    });
+  };
+
+  refCarousel = (carousel) => {
+    this.carousel = carousel;
+    if (!this.carousel) return;
+    this.fixPosition();
+  }
 
   render() {
     const { width } = Dimensions.get('window');
@@ -55,11 +86,16 @@ export default class App extends React.Component {
     return (
       <View style={styles.container}>
         <SnapCarousel
+          ref={this.refCarousel}
           data={data}
-          renderItem={({ item, index }) => <ItemCard wanted={carouselIndex} num={item} index={index} />}
+          renderItem={({ item, index }) => <ItemCard
+            check={this.check}
+            wanted={carouselIndex}
+            num={item}
+            index={index}
+          />}
           sliderWidth={width}
           itemWidth={width}
-          firstItem={carouselIndex}
           onSnapToItem={this.onSnapToItem}
           loop
         />
